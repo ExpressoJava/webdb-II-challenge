@@ -55,6 +55,7 @@ const errors = {
 // Create zoos animal
 server.post('/api/zoos', async (req, res) => {
   try {
+    //To insert multiple records, pass an array instead of an object to .insert()
     const [id] = await db('zoos').insert(req.body)
     const zoo = await db('zoos').where({id}).first() // respond with the id of the last record inserted
     res.status(201).json(zoo)
@@ -64,8 +65,24 @@ server.post('/api/zoos', async (req, res) => {
   }
 })
 
+// Update zoos animal
+server.put('/api/zoos/:id', async (req, res) => {
+  try {
+    const count = await db('zoos').where({id: req.params.id}).update(req.body)
+    
+    if (count > 0) {
+      const zoo = await db("zoos").where({id: req.params.id}).first()
+      res.status(200).json(count) // or .json(zoo), depending on you
+    } else {
+      res.status(404).json({message: 'Record not found' })
+    }
+  } catch(error) {
+    res.status(500).json()
+  }
+  
+})
 
 const port = 3300;
 server.listen(port, function() {
-  console.log(`\n=== Web API Listening on http://localhost:${port} ===\n`);
-});
+  console.log(`\n=== Web API Listening on http://localhost:${port} ===\n`)
+})
